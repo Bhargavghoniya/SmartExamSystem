@@ -1,0 +1,136 @@
+@model List<SmartExamSystem.Models.ExamMaster>
+
+@{
+    ViewData["Title"] = "Exam Management";
+    var questionCounts = ViewBag.QuestionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<style>
+    .page-wrap { max-width: 1400px; margin: 0 auto; padding: 28px 20px; }
+    .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+    .exam-card {
+        background: var(--bg-card);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition: all var(--transition-base);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .exam-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+    }
+
+    .exam-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        border-color: var(--primary);
+    }
+
+    .exam-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+
+    .exam-info { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; flex: 1; }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+    .info-row-label { color: var(--text-muted); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; }
+    .info-row-value { color: var(--text-primary); font-weight: 600; font-size: 0.9rem; }
+
+    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .card-actions form { display: inline; flex: 1; }
+    .card-actions .ses-btn { flex: 1; }
+
+    @@media (max-width: 768px) { .exam-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="page-wrap animate-fade-in-up">
+    <a href="/Admin/Dashboard" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="ses-alert ses-alert-success"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
+    }
+
+    <div class="ses-page-header">
+        <h1><i class="fas fa-book-open"></i> Exam Management</h1>
+        <a href="/Admin/AddExam" class="ses-btn ses-btn-primary"><i class="fas fa-plus"></i> Create Exam</a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card"><div class="ses-empty">
+            <i class="fas fa-book"></i>
+            <h3>No Exams Created</h3>
+            <p>No exams yet. <a href="/Admin/AddExam">Create one now</a></p>
+        </div></div>
+    }
+    else
+    {
+        <div class="exam-grid">
+            @foreach (var exam in Model)
+            {
+                int qCount = questionCounts.ContainsKey(exam.ExamId) ? questionCounts[exam.ExamId] : 0;
+                <div class="exam-card">
+                    <h3 class="exam-title">@exam.ExamName</h3>
+                    <div class="exam-info">
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fas fa-clock"></i> Duration</span>
+                            <span class="info-row-value">@exam.DurationMinutes min</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fas fa-star"></i> Total Marks</span>
+                            <span class="info-row-value">@exam.TotalMarks</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label"><i class="fas fa-question-circle"></i> Questions</span>
+                            <span class="info-row-value">@qCount</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row-label">Status</span>
+                            <span class="ses-badge @(exam.IsActive ? "ses-badge-success" : "ses-badge-danger")">
+                                @(exam.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="/Admin/QuestionList?examId=@exam.ExamId" class="ses-btn ses-btn-accent ses-btn-sm">
+                            <i class="fas fa-list"></i> Questions
+                        </a>
+                        <a href="/Admin/EditExam/@exam.ExamId" class="ses-btn ses-btn-ghost ses-btn-sm">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <form method="post" action="/Admin/ToggleExamStatus/@exam.ExamId">
+                            <button type="submit" class="ses-btn ses-btn-ghost ses-btn-sm" style="width:100%;"
+                                    onclick="return confirm('@(exam.IsActive ? "Deactivate this exam?" : "Activate this exam?")');">
+                                <i class="fas fa-@(exam.IsActive ? "pause" : "play")"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="/Admin/DeleteExam/@exam.ExamId">
+                            <button type="submit" class="ses-btn ses-btn-danger ses-btn-sm" style="width:100%;"
+                                    onclick="return confirm('Delete this exam? This cannot be undone.');">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

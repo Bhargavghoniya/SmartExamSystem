@@ -1,0 +1,162 @@
+@{
+    ViewData["Title"] = "Admin Login";
+}
+
+<style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 60% 30%, rgba(239, 68, 68, 0.06) 0%, transparent 50%),
+                    radial-gradient(circle at 30% 70%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
+    }
+
+    .login-card {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        animation: fadeInUp 0.6s ease both;
+    }
+
+    .login-card-inner {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        padding: 48px 36px;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .login-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 1.6rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    .login-title {
+        text-align: center;
+        margin-bottom: 8px;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+    }
+
+    .demo-box {
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.15);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+        color: var(--warning);
+    }
+
+    .demo-box strong { color: var(--text-primary); }
+
+    .login-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1rem;
+        margin-top: 8px;
+        background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+        color: white;
+    }
+
+    .login-btn:hover {
+        box-shadow: 0 6px 24px rgba(239, 68, 68, 0.35);
+        color: white;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .login-footer a {
+        font-weight: 600;
+        color: var(--primary-light);
+    }
+
+    .login-footer a:hover { color: var(--accent); }
+</style>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-card-inner">
+            <div class="login-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="login-title">Admin Portal</h1>
+            <p class="login-subtitle">SmartExam System Administration</p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="ses-alert ses-alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                </div>
+            }
+
+            @* <div class="demo-box">
+                <i class="fas fa-key"></i>&nbsp;
+                <strong>Demo:</strong> Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin123</strong>
+            </div> *@
+
+            <form method="post" asp-action="Login">
+                <div class="ses-form-group">
+                    <label class="ses-label" for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="username" name="username" class="ses-input"
+                           placeholder="Enter admin username" required autofocus />
+                </div>
+
+                <div class="ses-form-group">
+                    <label class="ses-label" for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="password" name="password" class="ses-input"
+                           placeholder="Enter password" required />
+                </div>
+
+                <button type="submit" class="ses-btn login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login to Admin Panel
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="/Student/Login"><i class="fas fa-arrow-left"></i> Back to Student Login</a>
+            </div>
+        </div>
+    </div>
+</div>

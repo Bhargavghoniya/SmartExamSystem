@@ -1,0 +1,50 @@
+@model SmartExamSystem.Models.ExamStudent
+@{ ViewData["Title"] = "Edit Student"; }
+
+<div style="max-width:600px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Admin/StudentList" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Students</a>
+    <div class="ses-card" style="padding:36px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);text-align:center;margin-bottom:32px;">
+            <i class="fas fa-user-edit" style="color:var(--primary);"></i> Edit Student
+        </h1>
+        <form method="post" asp-action="EditStudent" asp-route-id="@Model.StudentId">
+            <input type="hidden" name="StudentId" value="@Model.StudentId" />
+            <div class="ses-form-group">
+                <label class="ses-label">Student Name *</label>
+                <input type="text" name="StudentName" class="ses-input" value="@Model.StudentName" required />
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Email Address *</label>
+                <input type="email" name="Email" class="ses-input" value="@Model.Email" required />
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Password *</label>
+                <input type="text" name="Password" class="ses-input" value="@Model.Password" required />
+                <small style="color:var(--text-muted);font-size:0.78rem;">Shown in plain text for admin management</small>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Phone Number</label>
+                <input type="tel" name="PhoneNumber" class="ses-input" value="@Model.PhoneNumber" placeholder="+91-XXXXXXXXXX" />
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Address</label>
+                <textarea name="Address" class="ses-input">@Model.Address</textarea>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Account Status</label>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+                    <input type="checkbox" id="IsActive" name="IsActive" value="true" @(Model.IsActive ? "checked" : "")
+                           style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;" />
+                    <label for="IsActive" style="color:var(--text-secondary);font-size:0.9rem;text-transform:none;letter-spacing:0;margin:0;cursor:pointer;">
+                        Account is Active (uncheck to block)
+                    </label>
+                </div>
+                <input type="hidden" name="IsActive" value="false" />
+            </div>
+            <div class="ses-form-actions">
+                <button type="submit" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-check"></i> Save Changes</button>
+                <a href="/Admin/StudentList" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

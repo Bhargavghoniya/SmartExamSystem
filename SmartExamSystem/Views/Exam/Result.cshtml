@@ -1,0 +1,166 @@
+@model SmartExamSystem.Models.ExamAttempt
+
+@{
+    ViewData["Title"] = "Exam Result";
+    double percentage = Model.Exam.TotalMarks > 0
+        ? Math.Round((double)Model.Score / Model.Exam.TotalMarks * 100, 1)
+        : 0;
+    string resultStatus = percentage >= 60 ? "PASS" : "FAIL";
+    bool isTerminated = Model.Status == "Terminated";
+    bool isPassed = percentage >= 60;
+}
+
+<style>
+    .result-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 20px;
+    }
+
+    .result-wrap { max-width: 680px; width: 100%; animation: fadeInUp 0.6s ease both; }
+
+    .result-card {
+        background: var(--bg-card);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .result-banner {
+        padding: 40px 30px;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+
+    .result-banner.pass { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+    .result-banner.fail { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); }
+    .result-banner.terminated { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+    .result-icon { font-size: 3.5rem; margin-bottom: 14px; }
+    .result-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+    .result-exam-name { opacity: 0.9; font-size: 0.95rem; }
+
+    .score-ring {
+        width: 130px; height: 130px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        border: 4px solid rgba(255,255,255,0.4);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        margin: 20px auto 0;
+    }
+
+    .score-big { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .score-sub { font-size: 0.8rem; opacity: 0.85; margin-top: 4px; }
+
+    .result-body { padding: 32px; }
+
+    .prog-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+    .prog-bar { background: var(--border); border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 24px; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    .info-cell {
+        background: rgba(99,102,241,0.04);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        border-left: 3px solid var(--primary);
+    }
+    .info-cell-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .info-cell-value { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+    @@media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="result-page">
+    <div class="result-wrap">
+        <div class="result-card">
+            <div class="result-banner @(isTerminated ? "terminated" : isPassed ? "pass" : "fail")">
+                <div class="result-icon">
+                    @if (isTerminated) { <i class="fas fa-ban"></i> }
+                    else if (isPassed) { <i class="fas fa-trophy"></i> }
+                    else { <i class="fas fa-exclamation-circle"></i> }
+                </div>
+                <div class="result-title">
+                    @if (isTerminated) { <span>Exam Terminated</span> }
+                    else if (isPassed) { <span>Congratulations!</span> }
+                    else { <span>Better Luck Next Time</span> }
+                </div>
+                <div class="result-exam-name">@Model.Exam.ExamName</div>
+                <div class="score-ring">
+                    <div class="score-big">@percentage%</div>
+                    <div class="score-sub">@Model.Score / @Model.Exam.TotalMarks</div>
+                </div>
+            </div>
+
+            <div class="result-body">
+                @if (TempData["Error"] != null)
+                {
+                    <div class="ses-alert ses-alert-warning"><i class="fas fa-clock"></i> @TempData["Error"]</div>
+                }
+                @if (isTerminated)
+                {
+                    <div class="ses-alert ses-alert-danger"><i class="fas fa-ban"></i> <strong>Terminated:</strong> @Model.TerminateReason</div>
+                }
+                else if (Model.WarningCount > 0)
+                {
+                    <div class="ses-alert ses-alert-warning"><i class="fas fa-exclamation-triangle"></i> You received <strong>@Model.WarningCount warning(s)</strong> during this exam.</div>
+                }
+
+                <div class="prog-label">
+                    <span>Score Progress</span><span>@percentage%</span>
+                </div>
+                <div class="prog-bar">
+                    <div style="height:100%;width:@percentage%;background:@(isTerminated ? "var(--danger)" : isPassed ? "var(--success)" : "var(--warning)");border-radius:8px;transition:width 1s ease;"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-user"></i> Student</div>
+                        <div class="info-cell-value">@Model.Student.StudentName</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-chart-line"></i> Result</div>
+                        <div class="info-cell-value" style="color:@(isTerminated ? "var(--danger)" : isPassed ? "var(--success)" : "var(--warning)");">
+                            @(isTerminated ? "Terminated" : resultStatus)
+                        </div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-trophy"></i> Score</div>
+                        <div class="info-cell-value">@Model.Score / @Model.Exam.TotalMarks</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-exclamation-triangle"></i> Warnings</div>
+                        <div class="info-cell-value">@Model.WarningCount / 3</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-clock"></i> Start Time</div>
+                        <div class="info-cell-value">@Model.StartTime.ToString("dd MMM yyyy HH:mm")</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-clock"></i> End Time</div>
+                        <div class="info-cell-value">@(Model.EndTime.HasValue ? Model.EndTime.Value.ToString("dd MMM yyyy HH:mm") : "—")</div>
+                    </div>
+                    @if (Model.EndTime.HasValue)
+                    {
+                        <div class="info-cell">
+                            <div class="info-cell-label"><i class="fas fa-stopwatch"></i> Time Taken</div>
+                            <div class="info-cell-value">@((int)(Model.EndTime.Value - Model.StartTime).TotalMinutes) minutes</div>
+                        </div>
+                    }
+                    <div class="info-cell">
+                        <div class="info-cell-label"><i class="fas fa-info-circle"></i> Status</div>
+                        <div class="info-cell-value">@Model.Status</div>
+                    </div>
+                </div>
+
+                <a href="/Student/AvailableExams" class="ses-btn ses-btn-primary" style="width:100%;">
+                    <i class="fas fa-arrow-left"></i> Back to Exams
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

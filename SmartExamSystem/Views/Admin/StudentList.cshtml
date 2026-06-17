@@ -1,0 +1,87 @@
+@model List<SmartExamSystem.Models.ExamStudent>
+
+@{
+    ViewData["Title"] = "Student Management";
+}
+
+<style>
+    .page-wrap { max-width: 1400px; margin: 0 auto; padding: 28px 20px; }
+    .action-btns { display: flex; gap: 6px; }
+</style>
+
+<div class="page-wrap animate-fade-in-up">
+    <a href="/Admin/Dashboard" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="ses-alert ses-alert-success"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
+    }
+
+    <div class="ses-page-header">
+        <h1><i class="fas fa-users"></i> Student Management</h1>
+        <a href="/Admin/AddStudent" class="ses-btn ses-btn-primary"><i class="fas fa-user-plus"></i> Add Student</a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card" style="padding:0;">
+            <div class="ses-empty">
+                <i class="fas fa-user-slash"></i>
+                <h3>No Students</h3>
+                <p>No students added yet. <a href="/Admin/AddStudent">Add one now</a></p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="ses-card" style="overflow:hidden;">
+            <div style="overflow-x:auto;">
+                <table class="ses-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in Model)
+                        {
+                            <tr>
+                                <td><strong>@student.StudentName</strong></td>
+                                <td style="color:var(--text-secondary);">@student.Email</td>
+                                <td>@(string.IsNullOrEmpty(student.PhoneNumber) ? "—" : student.PhoneNumber)</td>
+                                <td>
+                                    <span class="ses-badge @(student.IsActive ? "ses-badge-success" : "ses-badge-danger")">
+                                        @(student.IsActive ? "Active" : "Blocked")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a href="/Admin/EditStudent/@student.StudentId" class="ses-btn ses-btn-accent ses-btn-sm">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form method="post" action="/Admin/ToggleStudentStatus/@student.StudentId" style="display:inline;">
+                                            <button type="submit" class="ses-btn ses-btn-ghost ses-btn-sm"
+                                                    onclick="return confirm('@(student.IsActive ? "Block this student?" : "Unblock this student?")');">
+                                                <i class="fas fa-@(student.IsActive ? "lock" : "lock-open")"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="/Admin/DeleteStudent/@student.StudentId" style="display:inline;">
+                                            <button type="submit" class="ses-btn ses-btn-danger ses-btn-sm"
+                                                    onclick="return confirm('Delete this student? This cannot be undone.');">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

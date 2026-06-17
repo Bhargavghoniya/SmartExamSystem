@@ -1,0 +1,106 @@
+@model SmartExamSystem.Models.ExamQuestion
+@{
+    ViewData["Title"] = "Add Question";
+    var exams = ViewBag.Exams as List<SmartExamSystem.Models.ExamMaster>;
+}
+
+<style>
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .option-box {
+        background: rgba(99, 102, 241, 0.04);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        transition: all var(--transition-fast);
+    }
+    .option-box:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.08); }
+    .opt-letter {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: var(--gradient-primary); color: white;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.85rem; margin-bottom: 10px;
+    }
+    .radio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .radio-opt {
+        display: flex; align-items: center; gap: 8px; padding: 12px;
+        border: 1px solid var(--border); border-radius: var(--radius-md);
+        cursor: pointer; transition: all var(--transition-fast);
+        background: var(--bg-card);
+    }
+    .radio-opt:hover { border-color: var(--primary); background: rgba(99,102,241,0.06); }
+    .radio-opt input { accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
+    .radio-opt label { margin: 0; color: var(--text-primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; text-transform: none; letter-spacing: 0; }
+    @@media (max-width: 600px) { .options-grid, .radio-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div style="max-width:800px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Admin/QuestionList" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Questions</a>
+    <div class="ses-card" style="padding:36px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);text-align:center;margin-bottom:8px;">
+            <i class="fas fa-question-circle" style="color:var(--primary);"></i> Add New Question
+        </h1>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;font-size:0.9rem;">Create a multiple choice question</p>
+
+        <form method="post" asp-action="AddQuestion">
+            <div class="ses-form-group">
+                <label class="ses-label">Select Exam *</label>
+                <select name="ExamId" class="ses-input ses-select" required>
+                    <option value="">-- Select Exam --</option>
+                    @if (exams != null)
+                    {
+                        @foreach (var exam in exams)
+                        {
+                            <option value="@exam.ExamId">@exam.ExamName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Question Text *</label>
+                <textarea name="QuestionText" class="ses-input" placeholder="Enter the complete question here..." required></textarea>
+            </div>
+
+            <div style="background:rgba(99,102,241,0.06);border-left:3px solid var(--primary);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:16px;font-weight:600;color:var(--primary-light);font-size:0.85rem;">
+                <i class="fas fa-list-ol"></i> Answer Options
+            </div>
+
+            <div class="options-grid">
+                <div class="option-box">
+                    <div class="opt-letter">A</div>
+                    <input type="text" name="OptionA" class="ses-input" placeholder="Option A" required />
+                </div>
+                <div class="option-box">
+                    <div class="opt-letter">B</div>
+                    <input type="text" name="OptionB" class="ses-input" placeholder="Option B" required />
+                </div>
+                <div class="option-box">
+                    <div class="opt-letter">C</div>
+                    <input type="text" name="OptionC" class="ses-input" placeholder="Option C" required />
+                </div>
+                <div class="option-box">
+                    <div class="opt-letter">D</div>
+                    <input type="text" name="OptionD" class="ses-input" placeholder="Option D" required />
+                </div>
+            </div>
+
+            <div style="background:var(--success-bg);border:1px solid rgba(16,185,129,0.2);padding:20px;border-radius:var(--radius-md);margin-bottom:20px;">
+                <label class="ses-label" style="color:var(--success);"><i class="fas fa-check-circle"></i> Correct Answer *</label>
+                <div class="radio-grid">
+                    <div class="radio-opt"><input type="radio" id="cA" name="CorrectOption" value="A" required /><label for="cA">Option A</label></div>
+                    <div class="radio-opt"><input type="radio" id="cB" name="CorrectOption" value="B" /><label for="cB">Option B</label></div>
+                    <div class="radio-opt"><input type="radio" id="cC" name="CorrectOption" value="C" /><label for="cC">Option C</label></div>
+                    <div class="radio-opt"><input type="radio" id="cD" name="CorrectOption" value="D" /><label for="cD">Option D</label></div>
+                </div>
+            </div>
+
+            <div class="ses-form-group">
+                <label class="ses-label">Marks *</label>
+                <input type="number" name="Marks" class="ses-input" value="1" min="1" required />
+            </div>
+            <div class="ses-form-actions">
+                <button type="submit" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-check"></i> Add Question</button>
+                <a href="/Admin/QuestionList" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

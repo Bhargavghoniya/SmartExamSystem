@@ -1,0 +1,81 @@
+@model List<SmartExamSystem.Models.ExamQuestion>
+@{ ViewData["Title"] = "Question Management"; }
+
+<style>
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .q-card {
+        background: var(--bg-card); border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px;
+        border-left: 4px solid var(--primary); transition: all var(--transition-base);
+    }
+    .q-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.3); transform: translateY(-3px); }
+    .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+    .q-num { background: var(--gradient-primary); color: white; padding: 4px 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; }
+    .q-text { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; line-height: 1.6; }
+    .q-marks { background: var(--warning-bg); border-left: 3px solid var(--warning); padding: 8px 14px; border-radius: var(--radius-sm); font-weight: 600; color: var(--warning); font-size: 0.85rem; margin-bottom: 14px; }
+    .opts-wrap { background: rgba(99,102,241,0.04); border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; }
+    .opt-item { padding: 8px 0; color: var(--text-secondary); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 8px; }
+    .opt-item:last-child { border-bottom: none; }
+    .opt-lbl { font-weight: 700; color: var(--primary-light); }
+    .correct-tag { background: var(--success-bg); color: var(--success); padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+    .q-actions { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+</style>
+
+<div class="page-wrap animate-fade-in-up">
+    <a href="/Admin/Dashboard" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="ses-alert ses-alert-success"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
+    }
+
+    <div class="ses-page-header">
+        <div>
+            <h1><i class="fas fa-question-circle"></i> Questions</h1>
+            <p style="color:var(--text-muted);margin-top:4px;font-size:0.9rem;">Manage exam questions and answers</p>
+        </div>
+        <a href="/Admin/AddQuestion@(ViewBag.FilterExamId != null ? "?examId=" + ViewBag.FilterExamId : "")" class="ses-btn ses-btn-primary">
+            <i class="fas fa-plus"></i> Add Question
+        </a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card"><div class="ses-empty">
+            <i class="fas fa-question"></i>
+            <h3>No Questions</h3>
+            <p>No questions added yet. <a href="/Admin/AddQuestion">Add one now</a></p>
+        </div></div>
+    }
+    else
+    {
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var question = Model[i];
+            <div class="q-card">
+                <div class="q-header">
+                    <span class="q-num">Question @(i + 1)</span>
+                    <span style="font-size:0.82rem;color:var(--text-muted);">@question.Exam?.ExamName</span>
+                </div>
+                <p class="q-text">@question.QuestionText</p>
+                <div class="q-marks"><i class="fas fa-star"></i> Marks: @question.Marks</div>
+                <div class="opts-wrap">
+                    @foreach (var opt in new[] { ("A", question.OptionA), ("B", question.OptionB), ("C", question.OptionC), ("D", question.OptionD) })
+                    {
+                        <div class="opt-item">
+                            <span class="opt-lbl">@opt.Item1)</span>
+                            <span>@opt.Item2</span>
+                            @if (question.CorrectOption == opt.Item1) { <span class="correct-tag"><i class="fas fa-check"></i> Correct</span> }
+                        </div>
+                    }
+                </div>
+                <div class="q-actions">
+                    <a href="/Admin/EditQuestion/@question.QuestionId" class="ses-btn ses-btn-accent ses-btn-sm"><i class="fas fa-pen"></i> Edit</a>
+                    <form method="post" action="/Admin/DeleteQuestion/@question.QuestionId" style="display:inline;">
+                        <button type="submit" class="ses-btn ses-btn-danger ses-btn-sm" onclick="return confirm('Delete this question?');"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+</div>

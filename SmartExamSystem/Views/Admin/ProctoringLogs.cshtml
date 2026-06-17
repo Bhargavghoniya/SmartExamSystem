@@ -1,0 +1,123 @@
+@model List<SmartExamSystem.Models.ExamProctoringLog>
+@{
+    ViewData["Title"] = "Proctoring Logs";
+    var attempt = ViewBag.Attempt as SmartExamSystem.Models.ExamAttempt;
+}
+
+<style>
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .attempt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+    .info-box { background: rgba(99,102,241,0.04); border-left: 3px solid var(--primary); padding: 14px 16px; border-radius: var(--radius-sm); }
+    .info-box .lbl { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .info-box .val { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); }
+    .log-item {
+        padding: 18px 24px; border-bottom: 1px solid var(--border-light);
+        transition: background var(--transition-fast);
+    }
+    .log-item:hover { background: rgba(99,102,241,0.04); }
+    .log-item:last-child { border-bottom: none; }
+    .log-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .log-type-tag { padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; background: var(--gradient-primary); color: white; letter-spacing: 0.5px; }
+    .log-time { color: var(--text-muted); font-size: 0.82rem; }
+    .log-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+    .warning-dot {
+        width: 40px; height: 40px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 800; color: white; font-size: 1.1rem;
+    }
+</style>
+
+<div class="page-wrap animate-fade-in-up">
+    <a href="/Admin/ExamAttempts" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Attempts</a>
+
+    <!-- Header Card -->
+    <div class="ses-card" style="padding:28px 32px;margin-bottom:24px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);margin-bottom:4px;">
+            <i class="fas fa-search" style="color:var(--primary);"></i> Proctoring Logs & Analysis
+        </h1>
+        <div class="attempt-grid">
+            <div class="info-box">
+                <div class="lbl">Student</div>
+                <div class="val">@attempt.Student?.StudentName</div>
+            </div>
+            <div class="info-box">
+                <div class="lbl">Exam</div>
+                <div class="val">@attempt.Exam?.ExamName</div>
+            </div>
+            <div class="info-box">
+                <div class="lbl">Status</div>
+                <div class="val">
+                    @{
+                        string st = attempt.Status;
+                        string bc = st == "Submitted" ? "ses-badge-success" : st == "Terminated" ? "ses-badge-danger" : "ses-badge-info";
+                    }
+                    <span class="ses-badge @bc">@st</span>
+                </div>
+            </div>
+            <div class="info-box">
+                <div class="lbl">Warnings</div>
+                <div class="val">
+                    @{
+                        string dotColor = attempt.WarningCount >= 3 ? "var(--danger)" :
+                                          attempt.WarningCount >= 2 ? "var(--warning)" : "var(--success)";
+                    }
+                    <span class="warning-dot" style="background:@dotColor;">@attempt.WarningCount</span>
+                    <span style="color:var(--text-muted);margin-left:8px;">/ 3</span>
+                </div>
+            </div>
+            <div class="info-box">
+                <div class="lbl">Start Time</div>
+                <div class="val" style="font-size:0.9rem;">@attempt.StartTime.ToString("dd MMM yyyy HH:mm:ss")</div>
+            </div>
+            <div class="info-box">
+                <div class="lbl">Duration</div>
+                <div class="val" style="font-size:0.9rem;">
+                    @if (attempt.EndTime.HasValue)
+                    {
+                        @($"{(attempt.EndTime.Value - attempt.StartTime).TotalMinutes:F1} minutes")
+                    }
+                    else
+                    {
+                        <em style="color:var(--text-muted);">In Progress</em>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs -->
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card"><div class="ses-empty">
+            <i class="fas fa-check-circle" style="color:var(--success);opacity:0.7;"></i>
+            <h3>No Suspicious Activity</h3>
+            <p>This exam attempt has no recorded suspicious activities.</p>
+        </div></div>
+    }
+    else
+    {
+        <div class="ses-card" style="overflow:hidden;">
+            <div style="background:rgba(239,68,68,0.08);padding:16px 24px;font-weight:700;color:var(--danger);font-size:0.95rem;border-bottom:1px solid var(--border-light);">
+                <i class="fas fa-exclamation-triangle"></i> Suspicious Activity Logs (@Model.Count recorded)
+            </div>
+            @foreach (var log in Model)
+            {
+                <div class="log-item">
+                    <div class="log-head">
+                        <span class="log-type-tag">@log.ActivityType</span>
+                        <span class="log-time"><i class="fas fa-clock"></i> @log.LogTime.ToString("dd MMM yyyy HH:mm:ss")</span>
+                    </div>
+                    <div class="log-desc">@log.Description</div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(attempt.TerminateReason))
+    {
+        <div class="ses-alert ses-alert-danger" style="margin-top:20px;">
+            <i class="fas fa-ban"></i>
+            <div><strong>Exam Terminated</strong><br />Reason: @attempt.TerminateReason</div>
+        </div>
+    }
+</div>

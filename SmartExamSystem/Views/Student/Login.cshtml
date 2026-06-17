@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "Student Login";
+}
+
+<style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+        animation: bgFloat 20s ease-in-out infinite;
+    }
+
+    @@keyframes bgFloat {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-2%, 2%); }
+    }
+
+    .login-card {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        animation: fadeInUp 0.6s ease both;
+    }
+
+    .login-card-inner {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        padding: 48px 36px;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .login-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--radius-lg);
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 1.6rem;
+        color: white;
+        box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .login-title {
+        text-align: center;
+        margin-bottom: 8px;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+    }
+
+    .demo-box {
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+        color: var(--primary-light);
+    }
+
+    .demo-box strong { color: var(--text-primary); }
+
+    .login-form .ses-form-group { margin-bottom: 20px; }
+
+    .login-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1rem;
+        margin-top: 8px;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .login-footer p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .login-footer a {
+        font-weight: 600;
+        color: var(--primary-light);
+        transition: all var(--transition-fast);
+    }
+
+    .login-footer a:hover {
+        color: var(--accent);
+    }
+
+    @@media (max-width: 480px) {
+        .login-card-inner {
+            padding: 32px 20px;
+        }
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-card-inner">
+            <div class="login-logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1 class="login-title">SmartExam</h1>
+            <p class="login-subtitle">Student Portal</p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="ses-alert ses-alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                </div>
+            }
+
+            @* <div class="demo-box">
+                <i class="fas fa-info-circle"></i>&nbsp;
+                <strong>Demo:</strong> Email: bhargav@gmail.com &nbsp;|&nbsp; Password: 123
+            </div> *@
+
+            <form method="post" asp-action="Login" class="login-form">
+                <div class="ses-form-group">
+                    <label class="ses-label" for="email">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="ses-input"
+                           placeholder="Enter your email"
+                           required
+                           autofocus />
+                </div>
+
+                <div class="ses-form-group">
+                    <label class="ses-label" for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="ses-input"
+                           placeholder="Enter your password"
+                           required />
+                </div>
+
+                <button type="submit" class="ses-btn ses-btn-primary login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login to Exam
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Are you an administrator?</p>
+                <a href="/Admin/Login"><i class="fas fa-shield-alt"></i> Admin Login &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,119 @@
+@model List<SmartExamSystem.Models.ExamAttempt>
+@{ ViewData["Title"] = "Exam Attempts"; }
+
+<style>
+    .page-wrap { max-width: 1400px; margin: 0 auto; padding: 28px 20px; }
+    .filters-bar {
+        background: var(--bg-card); border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 24px;
+        display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;
+    }
+    .filter-grp { display: flex; flex-direction: column; }
+    .filter-grp label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .filter-grp select { min-width: 200px; }
+</style>
+
+<div class="page-wrap animate-fade-in-up">
+    <a href="/Admin/Dashboard" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <div class="ses-page-header">
+        <div>
+            <h1><i class="fas fa-clipboard-list"></i> Exam Attempts</h1>
+            <p style="color:var(--text-muted);margin-top:4px;font-size:0.9rem;">Monitor all student exam attempts</p>
+        </div>
+    </div>
+
+    <form method="get" class="filters-bar">
+        <div class="filter-grp">
+            <label>Filter by Exam</label>
+            <select name="examId" class="ses-input ses-select">
+                <option value="">All Exams</option>
+                @{
+                    var exams = ViewBag.Exams as List<SmartExamSystem.Models.ExamMaster>
+                                ?? new List<SmartExamSystem.Models.ExamMaster>();
+                }
+                @foreach (var exam in exams)
+                {
+                    <option value="@exam.ExamId" selected='@(ViewBag.FilterExamId?.ToString() == exam.ExamId.ToString() ? "selected" : null)'>@exam.ExamName</option>
+                }
+            </select>
+        </div>
+        <div class="filter-grp">
+            <label>Filter by Status</label>
+            <select name="status" class="ses-input ses-select">
+                <option value="">All Status</option>
+                <option value="Started" selected='@(ViewBag.FilterStatus == "Started" ? "selected" : null)'>Started</option>
+                <option value="Submitted" selected='@(ViewBag.FilterStatus == "Submitted" ? "selected" : null)'>Submitted</option>
+                <option value="Terminated" selected='@(ViewBag.FilterStatus == "Terminated" ? "selected" : null)'>Terminated</option>
+            </select>
+        </div>
+        <button type="submit" class="ses-btn ses-btn-primary ses-btn-sm"><i class="fas fa-search"></i> Filter</button>
+        <a href="/Admin/ExamAttempts" class="ses-btn ses-btn-ghost ses-btn-sm"><i class="fas fa-redo"></i> Reset</a>
+    </form>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card"><div class="ses-empty">
+            <i class="fas fa-inbox"></i>
+            <h3>No Attempts Found</h3>
+            <p>No exam attempts match your filter criteria.</p>
+        </div></div>
+    }
+    else
+    {
+        <div class="ses-card" style="overflow:hidden;">
+            <div style="overflow-x:auto;">
+                <table class="ses-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Exam</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Warnings</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attempt in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@attempt.Student?.StudentName</strong><br />
+                                    <small style="color:var(--text-muted);">@attempt.Student?.Email</small>
+                                </td>
+                                <td>@attempt.Exam?.ExamName</td>
+                                <td style="font-size:0.85rem;">@attempt.StartTime.ToString("dd MMM yyyy HH:mm")</td>
+                                <td style="font-size:0.85rem;">
+                                    @if (attempt.EndTime.HasValue) { @attempt.EndTime.Value.ToString("dd MMM yyyy HH:mm") }
+                                    else { <em style="color:var(--text-muted);">In Progress</em> }
+                                </td>
+                                <td><strong>@attempt.Score / @(attempt.Exam?.TotalMarks ?? 0)</strong></td>
+                                <td>
+                                    @{
+                                        string st = attempt.Status;
+                                        string bc = st == "Submitted" ? "ses-badge-success" : st == "Terminated" ? "ses-badge-danger" : "ses-badge-info";
+                                    }
+                                    <span class="ses-badge @bc">@st</span>
+                                </td>
+                                <td>
+                                    <span style="font-weight:700;color:@(attempt.WarningCount >= 3 ? "var(--danger)" : attempt.WarningCount >= 2 ? "var(--warning)" : "var(--success)");">
+                                        @attempt.WarningCount
+                                    </span>
+                                    <small style="color:var(--text-muted);"> / 3</small>
+                                </td>
+                                <td>
+                                    <a href="/Admin/ProctoringLogs/@attempt.AttemptId" class="ses-btn ses-btn-ghost ses-btn-sm">
+                                        <i class="fas fa-eye"></i> Logs
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

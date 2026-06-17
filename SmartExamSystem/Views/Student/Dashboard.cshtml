@@ -1,0 +1,113 @@
+@model List<SmartExamSystem.Models.ExamAttempt>
+@{ ViewData["Title"] = "Student Dashboard"; }
+
+<style>
+    .dash-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .dash-topbar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .greet h1 { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
+    .greet p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    .nav-links { display: flex; gap: 10px; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+</style>
+
+<div class="dash-wrap animate-fade-in-up">
+    <div class="dash-topbar">
+        <div class="greet">
+            <h1><i class="fas fa-chart-bar" style="color:var(--primary);"></i> My Dashboard</h1>
+            <p>Welcome back, @ViewBag.StudentName!</p>
+        </div>
+        <div class="nav-links">
+            <a href="/Student/AvailableExams" class="ses-btn ses-btn-primary ses-btn-sm"><i class="fas fa-book-open"></i> Exams</a>
+            <a href="/Student/Profile" class="ses-btn ses-btn-ghost ses-btn-sm"><i class="fas fa-user"></i> Profile</a>
+            <a href="/Student/Logout" class="ses-btn ses-btn-danger ses-btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="ses-stat">
+            <div class="stat-icon" style="background:var(--info-bg);color:var(--info);"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-label">Total Attempts</div>
+            <div class="stat-value">@ViewBag.TotalAttempts</div>
+        </div>
+        <div class="ses-stat">
+            <div class="stat-icon" style="background:var(--success-bg);color:var(--success);"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-label">Completed</div>
+            <div class="stat-value">@ViewBag.CompletedExams</div>
+        </div>
+        <div class="ses-stat">
+            <div class="stat-icon" style="background:var(--warning-bg);color:var(--warning);"><i class="fas fa-trophy"></i></div>
+            <div class="stat-label">Average Score</div>
+            <div class="stat-value">@ViewBag.AverageScore%</div>
+        </div>
+    </div>
+
+    <!-- Exam History -->
+    <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-history" style="color:var(--primary);"></i> Exam History
+    </h2>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ses-card"><div class="ses-empty">
+            <i class="fas fa-inbox"></i>
+            <h3>No Exams Attempted</h3>
+            <p>You haven't taken any exams yet. <a href="/Student/AvailableExams">Browse exams</a></p>
+        </div></div>
+    }
+    else
+    {
+        <div class="ses-card" style="overflow:hidden;">
+            <div style="overflow-x:auto;">
+                <table class="ses-table">
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Warnings</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attempt in Model)
+                        {
+                            <tr>
+                                <td><strong>@attempt.Exam?.ExamName</strong></td>
+                                <td style="font-size:0.85rem;">@attempt.StartTime.ToString("dd MMM yyyy HH:mm")</td>
+                                <td>
+                                    <strong>@attempt.Score</strong>
+                                    <span style="color:var(--text-muted);"> / @(attempt.Exam?.TotalMarks ?? 0)</span>
+                                </td>
+                                <td>
+                                    @{
+                                        string s = attempt.Status;
+                                        string b = s == "Submitted" ? "ses-badge-success" : s == "Terminated" ? "ses-badge-danger" : "ses-badge-info";
+                                    }
+                                    <span class="ses-badge @b">@s</span>
+                                </td>
+                                <td>
+                                    <span style="font-weight:600;color:@(attempt.WarningCount > 0 ? "var(--warning)" : "var(--success)");">
+                                        @attempt.WarningCount
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (attempt.Status != "Started")
+                                    {
+                                        <a href="/Exam/Result/@attempt.AttemptId" class="ses-btn ses-btn-ghost ses-btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

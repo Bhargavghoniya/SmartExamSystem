@@ -1,0 +1,656 @@
+@model List<SmartExamSystem.Models.ExamQuestion>
+
+@{
+    ViewData["Title"] = "Exam Page";
+    int attemptId = ViewBag.AttemptId;
+    int durationMinutes = ViewBag.DurationMinutes;
+}
+
+<style>
+    body.exam-fullscreen {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #examContainer {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: var(--gradient-page);
+    }
+
+    .exam-header {
+        background: var(--bg-card);
+        border-bottom: 2px solid var(--primary);
+        padding: 16px 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .exam-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .exam-title {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .exam-timer {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 10px 24px;
+        border-radius: var(--radius-md);
+        font-size: 1.1rem;
+        font-weight: 700;
+        min-width: 150px;
+        text-align: center;
+        font-family: var(--font-mono), monospace;
+    }
+
+    .exam-timer.warning {
+        background: var(--gradient-danger);
+        animation: pulse 1s infinite;
+    }
+
+    #examContent {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 20px;
+    }
+
+    .questions-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .question-card {
+        background: var(--bg-card);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 18px;
+        border-left: 4px solid var(--primary);
+        transition: all var(--transition-base);
+    }
+
+    .question-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        transform: translateY(-2px);
+    }
+
+    .question-card.answered {
+        border-left-color: var(--success);
+    }
+
+    .question-number {
+        display: inline-block;
+        background: var(--gradient-primary);
+        color: white;
+        padding: 4px 12px;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .question-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 18px;
+        line-height: 1.6;
+    }
+
+    .option-group {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--bg-input);
+    }
+
+    .option-group:hover {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.06);
+    }
+
+    .option-group input[type="radio"] {
+        margin-right: 14px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .option-group input[type="radio"]:checked ~ label {
+        color: var(--primary-light);
+        font-weight: 600;
+    }
+
+    .option-group.selected {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .option-label {
+        margin: 0;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        flex: 1;
+    }
+
+    .exam-footer {
+        background: var(--bg-card);
+        border-top: 2px solid var(--primary);
+        padding: 16px 24px;
+        text-align: right;
+    }
+
+    .btn-submit {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 12px 36px;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-family: var(--font-family);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    #startOverlay {
+        background: rgba(15, 23, 42, 0.97);
+        backdrop-filter: blur(8px);
+    }
+
+    .start-overlay-content {
+        text-align: center;
+        color: white;
+        animation: slideDown 0.5s ease;
+    }
+
+    .start-overlay-content h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .start-overlay-content p {
+        font-size: 1rem;
+        margin-bottom: 28px;
+        opacity: 0.8;
+        color: var(--text-secondary);
+    }
+
+    .btn-fullscreen {
+        background: var(--gradient-danger);
+        color: white;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        font-family: var(--font-family);
+    }
+
+    .btn-fullscreen:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+    }
+
+    #warningBox {
+        background: var(--gradient-danger);
+        color: white;
+        border-radius: var(--radius-md);
+        padding: 14px 20px;
+        box-shadow: var(--shadow-lg);
+        font-weight: 600;
+        animation: slideDown 0.3s ease;
+    }
+
+    .progress-indicator {
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .progress-dot.answered {
+        background: var(--success);
+    }
+
+    .progress-dot.current {
+        background: var(--primary);
+        transform: scale(1.3);
+    }
+</style>
+
+<div id="examContainer">
+    <!-- Exam Header -->
+    <div class="exam-header">
+        <div class="exam-header-content">
+            <h1 class="exam-title"><i class="fas fa-file-alt"></i> @ViewBag.ExamName</h1>
+            <div class="exam-timer" id="timerDisplay">
+                <i class="fas fa-clock"></i> <span id="timer">--:--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Box -->
+    <div id="warningBox" class="position-fixed top-0 start-50 translate-middle-x mt-3 d-none"
+         style="z-index:10000; min-width:350px;">
+    </div>
+
+    <!-- Start Overlay -->
+    <div id="startOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+         style="z-index:9999;">
+        <div class="start-overlay-content">
+            <h2><i class="fas fa-file-alt"></i> Exam Ready</h2>
+            <p>Fullscreen mode is required to prevent distractions during the exam.</p>
+            <button type="button" id="btnStartExam" class="btn-fullscreen">
+                <i class="fas fa-expand"></i> Enter Fullscreen & Start Exam
+            </button>
+            <p id="debugText" style="margin-top: 30px; font-size: 14px; opacity: 0.6;"></p>
+        </div>
+    </div>
+
+    <!-- Exam Content -->
+    <div id="examContent">
+        <form id="examForm" asp-controller="Exam" asp-action="SubmitExam" method="post" class="questions-container">
+            <input type="hidden" name="attemptId" value="@attemptId" />
+
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <div class="question-card" data-question-id="@Model[i].QuestionId">
+                    <span class="question-number">Question @(i + 1) of @Model.Count</span>
+                    <h5 class="question-text">@Model[i].QuestionText</h5>
+
+                    <div class="option-group" onclick="selectOption(this, '@Model[i].QuestionId', 'A')">
+                        <input class="form-check-input" type="radio"
+                               id="q@(Model[i].QuestionId)_A"
+                               name="answers[@Model[i].QuestionId]"
+                               value="A" />
+                        <label class="option-label" for="q@(Model[i].QuestionId)_A">@Model[i].OptionA</label>
+                    </div>
+
+                    <div class="option-group" onclick="selectOption(this, '@Model[i].QuestionId', 'B')">
+                        <input class="form-check-input" type="radio"
+                               id="q@(Model[i].QuestionId)_B"
+                               name="answers[@Model[i].QuestionId]"
+                               value="B" />
+                        <label class="option-label" for="q@(Model[i].QuestionId)_B">@Model[i].OptionB</label>
+                    </div>
+
+                    <div class="option-group" onclick="selectOption(this, '@Model[i].QuestionId', 'C')">
+                        <input class="form-check-input" type="radio"
+                               id="q@(Model[i].QuestionId)_C"
+                               name="answers[@Model[i].QuestionId]"
+                               value="C" />
+                        <label class="option-label" for="q@(Model[i].QuestionId)_C">@Model[i].OptionC</label>
+                    </div>
+
+                    <div class="option-group" onclick="selectOption(this, '@Model[i].QuestionId', 'D')">
+                        <input class="form-check-input" type="radio"
+                               id="q@(Model[i].QuestionId)_D"
+                               name="answers[@Model[i].QuestionId]"
+                               value="D" />
+                        <label class="option-label" for="q@(Model[i].QuestionId)_D">@Model[i].OptionD</label>
+                    </div>
+                </div>
+            }
+
+            <div class="progress-indicator" id="progressIndicator"></div>
+        </form>
+    </div>
+
+    <!-- Exam Footer -->
+    <div class="exam-footer">
+        <button id="submitBtn" type="submit" class="btn-submit" form="examForm" disabled>
+            <i class="fas fa-paper-plane"></i> Submit Exam
+        </button>
+    </div>
+</div>
+
+<script>
+    const attemptId = @attemptId;
+    const durationMinutes = @durationMinutes;
+    const totalQuestions = @Model.Count;
+    // STEP 23: Server-side timer - calculate remaining seconds from server StartTime
+    const serverStartTime = new Date('@ViewBag.StartTime.ToString("o")');
+    const endTime = new Date(serverStartTime.getTime() + durationMinutes * 60 * 1000);
+
+    let totalSeconds = Math.max(0, Math.floor((endTime - new Date()) / 1000));
+    let timerInterval = null;
+    let examStarted = false;
+    let isSubmitting = false;
+    let lastActivityTime = {};
+    const logDelaySeconds = 3;
+
+    const btnStartExam = document.getElementById("btnStartExam");
+    const startOverlay = document.getElementById("startOverlay");
+    const submitBtn = document.getElementById("submitBtn");
+    const examForm = document.getElementById("examForm");
+    const timer = document.getElementById("timer");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const debugText = document.getElementById("debugText");
+
+    // Initialize progress indicators
+    initializeProgressIndicators();
+
+    function initializeProgressIndicators() {
+        const progressIndicator = document.getElementById("progressIndicator");
+        for (let i = 0; i < totalQuestions; i++) {
+            const dot = document.createElement("div");
+            dot.className = "progress-dot";
+            dot.setAttribute("data-index", i);
+            progressIndicator.appendChild(dot);
+        }
+    }
+
+    // FIXED: Proper fullscreen handling - Request fullscreen FIRST
+    btnStartExam.onclick = function () {
+        debugText.innerHTML = "Requesting fullscreen...";
+
+        tryFullscreen().then(function(success) {
+            if (success) {
+                startExamNow();
+                debugText.innerHTML = "Exam started! Good luck!";
+            } else {
+                debugText.innerHTML = "Fullscreen is required to start the exam.";
+                alert("Fullscreen is required to start the exam. Please allow fullscreen access.");
+            }
+        });
+    };
+
+    // FIXED: Proper async fullscreen request with fallback support
+    function tryFullscreen() {
+        return new Promise(function(resolve) {
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                debugText.innerHTML = "Already in fullscreen!";
+                resolve(true);
+                return;
+            }
+
+            const elem = document.documentElement;
+            const requestMethod = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen;
+
+            if (!requestMethod) {
+                debugText.innerHTML = "Fullscreen not supported on this browser";
+                resolve(false);
+                return;
+            }
+
+            try {
+                const req = requestMethod.call(elem);
+                if (req !== undefined && req !== null && typeof req.then === 'function') {
+                    req.then(function() {
+                        debugText.innerHTML = "Fullscreen entered successfully!";
+                        resolve(true);
+                    }).catch(function(error) {
+                        debugText.innerHTML = "Fullscreen permission denied: " + (error.message || "");
+                        resolve(false);
+                    });
+                } else {
+                    debugText.innerHTML = "Fullscreen entered successfully!";
+                    setTimeout(function() { resolve(true); }, 200);
+                }
+            } catch (error) {
+                debugText.innerHTML = "Error entering fullscreen.";
+                resolve(false);
+            }
+        });
+    }
+
+    function startExamNow() {
+        examStarted = true;
+        // Remove Bootstrap d-flex (!important) and add d-none to properly hide overlay
+        startOverlay.classList.remove("d-flex");
+        startOverlay.classList.add("d-none");
+        startOverlay.style.display = "none";
+        submitBtn.disabled = false;
+        document.body.classList.add("exam-fullscreen");
+        startTimer();
+    }
+
+    function startTimer() {
+        if (timerInterval !== null) {
+            return;
+        }
+
+        // If time already expired, submit immediately via AJAX
+        if (totalSeconds <= 0) {
+            isSubmitting = true;
+            autoSubmitExam();
+            return;
+        }
+
+        timerInterval = setInterval(function () {
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+
+            timer.innerHTML = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+
+            // Change color when time is running out
+            if (totalSeconds <= 300) { // 5 minutes
+                timerDisplay.classList.add("warning");
+            }
+
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                isSubmitting = true;
+                autoSubmitExam();
+            }
+
+            totalSeconds--;
+        }, 1000);
+    }
+
+    function autoSubmitExam() {
+        // Collect selected answers from the form
+        var formData = new FormData(examForm);
+
+        fetch('/Exam/SubmitExam', {
+            method: 'POST',
+            body: formData
+        })
+        .then(function(response) {
+            // Whether success or redirect, go to result page
+            window.location.href = '/Exam/Result/' + attemptId;
+        })
+        .catch(function(error) {
+            // Fallback: redirect to result page
+            window.location.href = '/Exam/Result/' + attemptId;
+        });
+    }
+
+    // STEP 24: Save answer one by one (AJAX)
+    function selectOption(optionGroup, questionId, option) {
+        const radio = optionGroup.querySelector('input[type="radio"]');
+        radio.checked = true;
+
+        // Update UI
+        const questionCard = optionGroup.closest('.question-card');
+        const siblings = questionCard.querySelectorAll('.option-group');
+        siblings.forEach(s => s.classList.remove('selected'));
+        optionGroup.classList.add('selected');
+
+        // Mark question as answered in progress indicator
+        const questionIndex = Array.from(document.querySelectorAll('.question-card')).indexOf(questionCard);
+        const dot = document.querySelector(`.progress-dot[data-index="${questionIndex}"]`);
+        if (dot) {
+            dot.classList.add('answered');
+        }
+
+        // Save answer immediately using AJAX
+        saveAnswerAjax(attemptId, questionId, option);
+    }
+
+    function saveAnswerAjax(attemptId, questionId, selectedOption) {
+        if (!examStarted || isSubmitting) {
+            return;
+        }
+
+        fetch('/Exam/SaveAnswer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'attemptId=' + encodeURIComponent(attemptId) +
+                  '&questionId=' + encodeURIComponent(questionId) +
+                  '&selectedOption=' + encodeURIComponent(selectedOption)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Answer saved for question ' + questionId);
+            }
+        })
+        .catch(error => console.error('Error saving answer:', error));
+    }
+
+    function logActivity(activityType, description) {
+        if (!examStarted || isSubmitting) {
+            return;
+        }
+
+        const now = new Date().getTime();
+
+        if (lastActivityTime[activityType] &&
+            (now - lastActivityTime[activityType]) < logDelaySeconds * 1000) {
+            return;
+        }
+
+        lastActivityTime[activityType] = now;
+
+        fetch('/Exam/LogActivity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'attemptId=' + encodeURIComponent(attemptId) +
+                  '&activityType=' + encodeURIComponent(activityType) +
+                  '&description=' + encodeURIComponent(description)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showWarning("⚠️ Warning " + data.warningCount + "/3: " + description);
+
+                if (data.status === "Terminated") {
+                    isSubmitting = true;
+                    window.location.href = "/Exam/Result/" + attemptId;
+                }
+            }
+        });
+    }
+
+    function showWarning(message) {
+        const warningBox = document.getElementById("warningBox");
+        warningBox.classList.remove("d-none");
+        warningBox.innerHTML = message;
+
+        setTimeout(function () {
+            warningBox.classList.add("d-none");
+        }, 4000);
+    }
+
+    // Monitoring events
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            logActivity("TAB_CHANGED", "Student changed tab or minimized browser.");
+        }
+    });
+
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        logActivity("RIGHT_CLICK", "Student tried to right click.");
+    });
+
+    document.addEventListener("copy", function (e) {
+        e.preventDefault();
+        logActivity("COPY", "Student tried to copy content.");
+    });
+
+    document.addEventListener("paste", function (e) {
+        e.preventDefault();
+        logActivity("PASTE", "Student tried to paste content.");
+    });
+
+    document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey && e.key.toLowerCase() === "c") {
+            e.preventDefault();
+            logActivity("CTRL_C", "Student pressed Ctrl + C.");
+        }
+
+        if (e.ctrlKey && e.key.toLowerCase() === "v") {
+            e.preventDefault();
+            logActivity("CTRL_V", "Student pressed Ctrl + V.");
+        }
+
+        if (e.ctrlKey && e.key.toLowerCase() === "u") {
+            e.preventDefault();
+            logActivity("CTRL_U", "Student tried to view page source.");
+        }
+
+        if (e.key === "F12") {
+            e.preventDefault();
+            logActivity("F12", "Student tried to open developer tools.");
+        }
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            logActivity("ESCAPE_KEY", "Student pressed Escape key.");
+        }
+    });
+
+    document.addEventListener("fullscreenchange", function () {
+        if (examStarted && !document.fullscreenElement && !isSubmitting) {
+            logActivity("FULLSCREEN_EXIT", "Student exited fullscreen mode.");
+        }
+    });
+
+    examForm.addEventListener("submit", function () {
+        isSubmitting = true;
+    });
+</script>

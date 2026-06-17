@@ -1,0 +1,40 @@
+@model SmartExamSystem.Models.ExamStudent
+@{ ViewData["Title"] = "Add Student"; }
+
+<div style="max-width:600px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Admin/StudentList" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Students</a>
+    <div class="ses-card" style="padding:36px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);text-align:center;margin-bottom:32px;">
+            <i class="fas fa-user-plus" style="color:var(--primary);"></i> Add New Student
+        </h1>
+        <form method="post" asp-action="AddStudent">
+            <div class="ses-form-group">
+                <label class="ses-label">Student Name *</label>
+                <input type="text" name="StudentName" class="ses-input" placeholder="Enter full name" required />
+                <span asp-validation-for="StudentName" class="ses-validation-error"></span>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Email Address *</label>
+                <input type="email" name="Email" class="ses-input" placeholder="student@example.com" required />
+                <span asp-validation-for="Email" class="ses-validation-error"></span>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Password *</label>
+                <input type="text" name="Password" class="ses-input" placeholder="Enter password" required />
+                <span asp-validation-for="Password" class="ses-validation-error"></span>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Phone Number</label>
+                <input type="tel" name="PhoneNumber" class="ses-input" placeholder="+91-XXXXXXXXXX" />
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Address</label>
+                <textarea name="Address" class="ses-input" placeholder="Enter address (optional)"></textarea>
+            </div>
+            <div class="ses-form-actions">
+                <button type="submit" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-check"></i> Add Student</button>
+                <a href="/Admin/StudentList" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

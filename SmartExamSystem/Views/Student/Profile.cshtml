@@ -1,0 +1,40 @@
+@model SmartExamSystem.Models.ExamStudent
+@{ ViewData["Title"] = "My Profile"; }
+
+<div style="max-width:600px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Student/AvailableExams" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Exams</a>
+
+    <div class="ses-card" style="padding:36px;">
+        <div style="text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);">
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--gradient-primary);color:white;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 14px;">
+                <i class="fas fa-user"></i>
+            </div>
+            <h1 style="font-size:1.4rem;font-weight:800;color:var(--text-primary);margin-bottom:4px;">@Model.StudentName</h1>
+            <p style="color:var(--text-muted);font-size:0.9rem;">@Model.Email</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+            <div style="background:rgba(99,102,241,0.04);padding:14px;border-radius:var(--radius-md);">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-envelope"></i> Email</div>
+                <div style="font-weight:600;color:var(--text-primary);">@Model.Email</div>
+            </div>
+            <div style="background:rgba(99,102,241,0.04);padding:14px;border-radius:var(--radius-md);">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-phone"></i> Phone</div>
+                <div style="font-weight:600;color:var(--text-primary);">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not set" : Model.PhoneNumber)</div>
+            </div>
+            <div style="background:rgba(99,102,241,0.04);padding:14px;border-radius:var(--radius-md);">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-map-marker-alt"></i> Address</div>
+                <div style="font-weight:600;color:var(--text-primary);">@(string.IsNullOrEmpty(Model.Address) ? "Not set" : Model.Address)</div>
+            </div>
+            <div style="background:rgba(99,102,241,0.04);padding:14px;border-radius:var(--radius-md);">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;"><i class="fas fa-calendar"></i> Member Since</div>
+                <div style="font-weight:600;color:var(--text-primary);">@Model.CreatedDate.ToString("dd MMM yyyy")</div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:10px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="/Student/EditProfile" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-pen"></i> Edit Profile</a>
+            <a href="/Student/AvailableExams" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-book-open"></i> My Exams</a>
+        </div>
+    </div>
+</div>

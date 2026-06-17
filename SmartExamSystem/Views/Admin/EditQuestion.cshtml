@@ -1,0 +1,90 @@
+@model SmartExamSystem.Models.ExamQuestion
+@{
+    ViewData["Title"] = "Edit Question";
+    var exams = ViewBag.Exams as List<SmartExamSystem.Models.ExamMaster>;
+}
+
+<style>
+    .option-box {
+        display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+        background: rgba(99,102,241,0.04); padding: 14px 16px;
+        border: 1px solid var(--border); border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+    }
+    .option-box:hover { border-color: var(--primary); }
+    .opt-letter {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: var(--gradient-primary); color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .option-box input { border: none; background: transparent; padding: 8px 0; box-shadow: none; color: var(--text-primary); font-size: 0.95rem; width: 100%; outline: none; }
+    .correct-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+    .radio-opt {
+        display: flex; align-items: center; gap: 8px; padding: 12px;
+        border: 1px solid var(--border); border-radius: var(--radius-md);
+        cursor: pointer; transition: all var(--transition-fast); background: var(--bg-card);
+    }
+    .radio-opt:hover { border-color: var(--primary); }
+    .radio-opt input { accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
+    .radio-opt label { margin: 0; color: var(--text-primary); font-weight: 600; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 0.9rem; }
+    @@media (max-width: 600px) { .correct-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<div style="max-width:800px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Admin/QuestionList?examId=@Model.ExamId" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Questions</a>
+    <div class="ses-card" style="padding:36px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);text-align:center;margin-bottom:32px;">
+            <i class="fas fa-edit" style="color:var(--primary);"></i> Edit Question
+        </h1>
+
+        <form method="post" asp-action="EditQuestion" asp-route-id="@Model.QuestionId">
+            <input type="hidden" name="QuestionId" value="@Model.QuestionId" />
+            <div class="ses-form-group">
+                <label class="ses-label">Select Exam *</label>
+                <select name="ExamId" class="ses-input ses-select" required>
+                    <option value="">-- Select Exam --</option>
+                    @if (exams != null)
+                    {
+                        foreach (var exam in exams)
+                        {
+                            <option value="@exam.ExamId" selected="@(Model.ExamId == exam.ExamId ? "selected" : null)">@exam.ExamName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Question Text *</label>
+                <textarea name="QuestionText" class="ses-input" required>@Model.QuestionText</textarea>
+            </div>
+
+            <div style="font-weight:600;color:var(--primary-light);font-size:0.85rem;margin-bottom:14px;">
+                <i class="fas fa-list-ol"></i> Answer Options
+            </div>
+
+            <div class="option-box"><div class="opt-letter">A</div><input type="text" name="OptionA" value="@Model.OptionA" required /></div>
+            <div class="option-box"><div class="opt-letter">B</div><input type="text" name="OptionB" value="@Model.OptionB" required /></div>
+            <div class="option-box"><div class="opt-letter">C</div><input type="text" name="OptionC" value="@Model.OptionC" required /></div>
+            <div class="option-box"><div class="opt-letter">D</div><input type="text" name="OptionD" value="@Model.OptionD" required /></div>
+
+            <div class="ses-form-group" style="margin-top:20px;">
+                <label class="ses-label" style="color:var(--success);"><i class="fas fa-check-circle"></i> Correct Answer *</label>
+                <div class="correct-grid">
+                    <div class="radio-opt"><input type="radio" id="cA" name="CorrectOption" value="A" @(Model.CorrectOption == "A" ? "checked" : "") required /><label for="cA">A</label></div>
+                    <div class="radio-opt"><input type="radio" id="cB" name="CorrectOption" value="B" @(Model.CorrectOption == "B" ? "checked" : "") /><label for="cB">B</label></div>
+                    <div class="radio-opt"><input type="radio" id="cC" name="CorrectOption" value="C" @(Model.CorrectOption == "C" ? "checked" : "") /><label for="cC">C</label></div>
+                    <div class="radio-opt"><input type="radio" id="cD" name="CorrectOption" value="D" @(Model.CorrectOption == "D" ? "checked" : "") /><label for="cD">D</label></div>
+                </div>
+            </div>
+
+            <div class="ses-form-group">
+                <label class="ses-label">Marks *</label>
+                <input type="number" name="Marks" class="ses-input" value="@Model.Marks" min="1" required />
+            </div>
+            <div class="ses-form-actions">
+                <button type="submit" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-check"></i> Save Changes</button>
+                <a href="/Admin/QuestionList?examId=@Model.ExamId" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

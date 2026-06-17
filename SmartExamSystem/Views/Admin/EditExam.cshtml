@@ -1,0 +1,52 @@
+@model SmartExamSystem.Models.ExamMaster
+@{ ViewData["Title"] = "Edit Exam"; }
+
+<div style="max-width:700px;margin:0 auto;padding:28px 20px;" class="animate-fade-in-up">
+    <a href="/Admin/ExamList" class="ses-back-link"><i class="fas fa-arrow-left"></i> Back to Exams</a>
+    <div class="ses-card" style="padding:36px;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);text-align:center;margin-bottom:8px;">
+            <i class="fas fa-edit" style="color:var(--primary);"></i> Edit Exam
+        </h1>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;font-size:0.9rem;">Update the exam details</p>
+        <form method="post" asp-action="EditExam" asp-route-id="@Model.ExamId">
+            <input type="hidden" name="ExamId" value="@Model.ExamId" />
+            <div class="ses-form-group">
+                <label class="ses-label">Exam Name *</label>
+                <input type="text" name="ExamName" class="ses-input" value="@Model.ExamName" required />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="ses-form-group">
+                    <label class="ses-label">Duration (minutes) *</label>
+                    <input type="number" name="DurationMinutes" class="ses-input" value="@Model.DurationMinutes" min="5" required />
+                </div>
+                <div class="ses-form-group">
+                    <label class="ses-label">Total Marks *</label>
+                    <input type="number" name="TotalMarks" class="ses-input" value="@Model.TotalMarks" min="1" required />
+                </div>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Description</label>
+                <textarea name="Description" class="ses-input">@Model.Description</textarea>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Instructions</label>
+                <textarea name="Instructions" class="ses-input">@Model.Instructions</textarea>
+            </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Exam Status</label>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+                    <input type="checkbox" id="IsActive" name="IsActive" value="true" @(Model.IsActive ? "checked" : "")
+                           style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;" />
+                    <label for="IsActive" style="color:var(--text-secondary);font-size:0.9rem;text-transform:none;letter-spacing:0;margin:0;cursor:pointer;">
+                        Exam is Active
+                    </label>
+                </div>
+                <input type="hidden" name="IsActive" value="false" />
+            </div>
+            <div class="ses-form-actions">
+                <button type="submit" class="ses-btn ses-btn-primary" style="flex:1;"><i class="fas fa-check"></i> Save Changes</button>
+                <a href="/Admin/ExamList" class="ses-btn ses-btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
