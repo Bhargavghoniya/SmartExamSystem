@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartExamSystem.Data;
 using SmartExamSystem.Models;
+using SmartExamSystem.Services;
 
 namespace SmartExamSystem.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // STEP 16: Admin Dashboard
@@ -132,7 +135,7 @@ namespace SmartExamSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddStudent(ExamStudent student)
+        public async Task<IActionResult> AddStudent(ExamStudent student)
         {
             int? adminId = HttpContext.Session.GetInt32("AdminId");
             if (adminId == null)
@@ -144,7 +147,26 @@ namespace SmartExamSystem.Controllers
             {
                 _context.ExamStudents.Add(student);
                 _context.SaveChanges();
-                TempData["Success"] = "Student added successfully";
+
+                // Send welcome email with login credentials
+                try
+                {
+                    var loginUrl = $"{Request.Scheme}://{Request.Host}/Student/Login";
+                    await _emailService.SendStudentWelcomeEmailAsync(
+                        student.Email,
+                        student.StudentName,
+                        student.Password,
+                        loginUrl
+                    );
+                    TempData["Success"] = "Student added successfully. Welcome email sent!";
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but don't fail the student creation
+                    TempData["Success"] = "Student added successfully.";
+                    TempData["Warning"] = $"Welcome email could not be sent: {ex.Message}";
+                }
+
                 return RedirectToAction("StudentList");
             }
 
@@ -280,6 +302,20 @@ namespace SmartExamSystem.Controllers
 
             if (ModelState.IsValid)
             {
+                // Check max 5 exams limit
+                var totalExams = _context.ExamMasters.Count();
+                if (totalExams >= 5)
+                {
+                    ModelState.AddModelError("", "Maximum limit of 5 exams reached. You cannot add more exams.");
+                    return View(exam);
+                }
+
+                if (exam.StartTime.HasValue && exam.EndTime.HasValue && exam.StartTime >= exam.EndTime)
+                {
+                    ModelState.AddModelError("EndTime", "End time must be after start time.");
+                    return View(exam);
+                }
+
                 _context.ExamMasters.Add(exam);
                 _context.SaveChanges();
                 TempData["Success"] = "Exam created successfully";
@@ -324,13 +360,22 @@ namespace SmartExamSystem.Controllers
             var existing = _context.ExamMasters.FirstOrDefault(e => e.ExamId == id);
             if (existing == null) return NotFound();
 
+            if (exam.StartTime.HasValue && exam.EndTime.HasValue && exam.StartTime >= exam.EndTime)
+            {
+                ModelState.AddModelError("EndTime", "End time must be after start time.");
+                return View(exam);
+            }
+
             existing.ExamName = exam.ExamName;
+            existing.Subject = exam.Subject;
+            existing.StartTime = exam.StartTime;
+            existing.EndTime = exam.EndTime;
             existing.DurationMinutes = exam.DurationMinutes;
             existing.TotalMarks = exam.TotalMarks;
             existing.Description = exam.Description;
             existing.Instructions = exam.Instructions;
             existing.IsActive = exam.IsActive;
-            existing.UpdatedDate = DateTime.Now;
+            existing.UpdatedDate = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
             _context.ExamMasters.Update(existing);
             _context.SaveChanges();
@@ -481,7 +526,7 @@ namespace SmartExamSystem.Controllers
             existing.OptionD = question.OptionD;
             existing.CorrectOption = question.CorrectOption;
             existing.Marks = question.Marks;
-            existing.UpdatedDate = DateTime.Now;
+            existing.UpdatedDate = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
             _context.ExamQuestions.Update(existing);
             _context.SaveChanges();

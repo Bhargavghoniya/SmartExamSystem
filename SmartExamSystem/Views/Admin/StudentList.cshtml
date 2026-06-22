@@ -16,6 +16,12 @@
     {
         <div class="ses-alert ses-alert-success"><i class="fas fa-check-circle"></i> @TempData["Success"]</div>
     }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="ses-alert ses-alert-success" style="background:linear-gradient(135deg,#fff3cd,#ffeaa7);border-color:#f0c040;color:#856404;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+        </div>
+    }
 
     <div class="ses-page-header">
         <h1><i class="fas fa-users"></i> Student Management</h1>

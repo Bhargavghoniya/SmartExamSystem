@@ -357,10 +357,7 @@
     const durationMinutes = @durationMinutes;
     const totalQuestions = @Model.Count;
     // STEP 23: Server-side timer - calculate remaining seconds from server StartTime
-    const serverStartTime = new Date('@ViewBag.StartTime.ToString("o")');
-    const endTime = new Date(serverStartTime.getTime() + durationMinutes * 60 * 1000);
-
-    let totalSeconds = Math.max(0, Math.floor((endTime - new Date()) / 1000));
+    let totalSeconds = @ViewBag.RemainingSeconds;
     let timerInterval = null;
     let examStarted = false;
     let isSubmitting = false;

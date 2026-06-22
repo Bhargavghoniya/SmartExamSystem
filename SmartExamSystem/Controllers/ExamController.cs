@@ -31,6 +31,18 @@ namespace SmartExamSystem.Controllers
                 return NotFound();
             }
 
+            if (exam.StartTime.HasValue && SmartExamSystem.Helpers.TimeHelper.GetLocalTime() < exam.StartTime.Value)
+            {
+                TempData["Error"] = $"This exam is not available yet. It will start at {exam.StartTime.Value:g}.";
+                return RedirectToAction("AvailableExams", "Student");
+            }
+
+            if (exam.EndTime.HasValue && SmartExamSystem.Helpers.TimeHelper.GetLocalTime() > exam.EndTime.Value)
+            {
+                TempData["Error"] = $"This exam has already ended at {exam.EndTime.Value:g}.";
+                return RedirectToAction("AvailableExams", "Student");
+            }
+
             // STEP 22: Prevent duplicate exam attempt
             var existingAttempt = _context.ExamAttempts
                 .FirstOrDefault(a => a.StudentId == studentId.Value && 
@@ -47,7 +59,7 @@ namespace SmartExamSystem.Controllers
             {
                 StudentId = studentId.Value,
                 ExamId = exam.ExamId,
-                StartTime = DateTime.Now,
+                StartTime = SmartExamSystem.Helpers.TimeHelper.GetLocalTime(),
                 Status = "Started",
                 Score = 0,
                 WarningCount = 0,
@@ -88,7 +100,7 @@ namespace SmartExamSystem.Controllers
 
             // Check if exam time has expired
             var examEndTime = attempt.StartTime.AddMinutes(attempt.Exam.DurationMinutes);
-            if (DateTime.Now > examEndTime)
+            if (SmartExamSystem.Helpers.TimeHelper.GetLocalTime() > examEndTime)
             {
                 // Auto-submit expired exam with score from saved answers
                 var savedAnswers = _context.ExamStudentAnswers
@@ -114,6 +126,7 @@ namespace SmartExamSystem.Controllers
             ViewBag.ExamName = attempt.Exam.ExamName;
             ViewBag.DurationMinutes = attempt.Exam.DurationMinutes;
             ViewBag.StartTime = attempt.StartTime;
+            ViewBag.RemainingSeconds = (int)Math.Max(0, (examEndTime - SmartExamSystem.Helpers.TimeHelper.GetLocalTime()).TotalSeconds);
 
             return View(questions);
         }
@@ -263,7 +276,7 @@ namespace SmartExamSystem.Controllers
             }
 
             attempt.Score = score;
-            attempt.EndTime = DateTime.Now;
+            attempt.EndTime = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
             attempt.Status = "Submitted";
 
             _context.SaveChanges();
@@ -321,7 +334,7 @@ namespace SmartExamSystem.Controllers
                 AttemptId = attempt.AttemptId,
                 ActivityType = activityType,
                 Description = description,
-                LogTime = DateTime.Now
+                LogTime = SmartExamSystem.Helpers.TimeHelper.GetLocalTime()
             };
 
             _context.ExamProctoringLogs.Add(log);
@@ -331,7 +344,7 @@ namespace SmartExamSystem.Controllers
             if (attempt.WarningCount >= 3)
             {
                 attempt.Status = "Terminated";
-                attempt.EndTime = DateTime.Now;
+                attempt.EndTime = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
                 attempt.TerminateReason = "Suspicious activity limit exceeded";
             }
 

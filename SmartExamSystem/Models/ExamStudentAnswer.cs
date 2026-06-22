@@ -23,7 +23,7 @@ namespace SmartExamSystem.Models
         [Required]
         public bool IsCorrect { get; set; } = false;
 
-        public DateTime AnsweredTime { get; set; } = DateTime.Now;
+        public DateTime AnsweredTime { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         // Foreign Keys
         [ForeignKey("AttemptId")]

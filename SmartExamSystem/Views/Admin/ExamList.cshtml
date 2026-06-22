@@ -89,6 +89,10 @@
                 int qCount = questionCounts.ContainsKey(exam.ExamId) ? questionCounts[exam.ExamId] : 0;
                 <div class="exam-card">
                     <h3 class="exam-title">@exam.ExamName</h3>
+                    @if (!string.IsNullOrEmpty(exam.Subject))
+                    {
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:-10px;margin-bottom:12px;font-weight:600;">@exam.Subject</div>
+                    }
                     <div class="exam-info">
                         <div class="info-row">
                             <span class="info-row-label"><i class="fas fa-clock"></i> Duration</span>
@@ -101,6 +105,13 @@
                         <div class="info-row">
                             <span class="info-row-label"><i class="fas fa-question-circle"></i> Questions</span>
                             <span class="info-row-value">@qCount</span>
+                        </div>
+                        <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+                            <span class="info-row-label"><i class="fas fa-calendar-alt"></i> Time Window</span>
+                            <span class="info-row-value" style="font-size:0.8rem;">
+                                @(exam.StartTime?.ToString("dd MMM yy, hh:mm tt") ?? "N/A") - <br/>
+                                @(exam.EndTime?.ToString("dd MMM yy, hh:mm tt") ?? "N/A")
+                            </span>
                         </div>
                         <div class="info-row">
                             <span class="info-row-label">Status</span>

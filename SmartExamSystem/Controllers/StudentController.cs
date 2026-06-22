@@ -77,7 +77,7 @@ namespace SmartExamSystem.Controllers
                 .Include(a => a.Exam)
                 .Where(a => a.StudentId == studentId.Value && a.Status == "Started")
                 .ToList()
-                .Where(a => a.Exam != null && DateTime.Now > a.StartTime.AddMinutes(a.Exam.DurationMinutes))
+                .Where(a => a.Exam != null && SmartExamSystem.Helpers.TimeHelper.GetLocalTime() > a.StartTime.AddMinutes(a.Exam.DurationMinutes))
                 .ToList();
 
             foreach (var expired in expiredAttempts)

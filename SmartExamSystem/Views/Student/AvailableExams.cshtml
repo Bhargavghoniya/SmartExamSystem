@@ -41,6 +41,15 @@
     }
     .attempted-done { background: var(--success-bg); color: var(--success); }
     .attempted-term { background: var(--danger-bg); color: var(--danger); }
+    .exam-status-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 12px; border-radius: var(--radius-md);
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; margin-bottom: 10px;
+    }
+    .status-scheduled { background: var(--info-bg); color: var(--info); }
+    .status-open { background: var(--success-bg); color: var(--success); }
+    .status-closed { background: var(--danger-bg); color: var(--danger); }
     @@media (max-width: 768px) { .exams-grid { grid-template-columns: 1fr; } }
 </style>
 
@@ -84,6 +93,34 @@
 
                 <div class="exam-card">
                     <h3 class="exam-card-title">@exam.ExamName</h3>
+                    @{
+                        var now = System.DateTime.Now;
+                        var startTime = exam.StartTime ?? System.DateTime.MinValue;
+                        var endTime = exam.EndTime ?? System.DateTime.MaxValue;
+                        var statusClass = "status-closed";
+                        var statusText = "Closed";
+                        var statusIcon = "fa-times-circle";
+
+                        if (now < startTime)
+                        {
+                            statusClass = "status-scheduled";
+                            statusText = "Scheduled";
+                            statusIcon = "fa-calendar-check";
+                        }
+                        else if (now >= startTime && now <= endTime)
+                        {
+                            statusClass = "status-open";
+                            statusText = "Open Now";
+                            statusIcon = "fa-play-circle";
+                        }
+                    }
+                    <div class="exam-status-badge @statusClass">
+                        <i class="fas @statusIcon"></i> @statusText
+                    </div>
+                    @if (!string.IsNullOrEmpty(exam.Subject))
+                    {
+                        <div style="font-size:0.85rem;color:var(--primary);margin-top:-10px;margin-bottom:12px;font-weight:600;">@exam.Subject</div>
+                    }
 
                     @if (!string.IsNullOrEmpty(exam.Description))
                     {
@@ -102,6 +139,13 @@
                         <div class="exam-row">
                             <span class="exam-row-label"><i class="fas fa-question-circle"></i> Questions</span>
                             <span class="exam-row-value">@qCount</span>
+                        </div>
+                        <div class="exam-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+                            <span class="exam-row-label"><i class="fas fa-calendar-alt"></i> Available Time</span>
+                            <span class="exam-row-value" style="font-size:0.8rem;">
+                                @(exam.StartTime?.ToString("dd MMM yy, hh:mm tt") ?? "Anytime") - <br/>
+                                @(exam.EndTime?.ToString("dd MMM yy, hh:mm tt") ?? "Anytime")
+                            </span>
                         </div>
                     </div>
 

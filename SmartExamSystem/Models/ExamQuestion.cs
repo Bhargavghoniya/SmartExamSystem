@@ -42,7 +42,7 @@ namespace SmartExamSystem.Models
         [Range(1, 100, ErrorMessage = "Marks must be between 1 and 100")]
         public int Marks { get; set; } = 1;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         public DateTime? UpdatedDate { get; set; }
 

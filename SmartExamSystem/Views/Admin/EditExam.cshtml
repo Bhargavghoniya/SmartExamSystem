@@ -14,6 +14,20 @@
                 <label class="ses-label">Exam Name *</label>
                 <input type="text" name="ExamName" class="ses-input" value="@Model.ExamName" required />
             </div>
+            <div class="ses-form-group">
+                <label class="ses-label">Subject *</label>
+                <input type="text" name="Subject" class="ses-input" value="@Model.Subject" required />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="ses-form-group">
+                    <label class="ses-label">Start Time *</label>
+                    <input type="datetime-local" name="StartTime" class="ses-input" value="@(Model.StartTime?.ToString("yyyy-MM-ddTHH:mm"))" required />
+                </div>
+                <div class="ses-form-group">
+                    <label class="ses-label">End Time *</label>
+                    <input type="datetime-local" name="EndTime" class="ses-input" value="@(Model.EndTime?.ToString("yyyy-MM-ddTHH:mm"))" required />
+                </div>
+            </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div class="ses-form-group">
                     <label class="ses-label">Duration (minutes) *</label>

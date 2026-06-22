@@ -31,7 +31,7 @@ namespace SmartExamSystem.Models
         // ✅ STEP 19: Added for Student Blocking/Unblocking
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         // Navigation Property
         public ICollection<ExamAttempt>? ExamAttempts { get; set; } = new List<ExamAttempt>();

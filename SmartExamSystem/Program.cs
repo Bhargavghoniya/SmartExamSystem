@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmartExamSystem.Data;
+using SmartExamSystem.Services;
+using SmartExamSystem.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,13 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Register Email Service
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Register Repositories & Unit of Work
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

@@ -23,16 +23,23 @@ namespace SmartExamSystem.Models
         [Range(1, 1000, ErrorMessage = "Total marks must be between 1 and 1000")]
         public int TotalMarks { get; set; }
 
+        public DateTime? StartTime { get; set; }
+
+        public DateTime? EndTime { get; set; }
+
+        [StringLength(100, ErrorMessage = "Subject cannot exceed 100 characters")]
+        public string? Subject { get; set; }
+
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [StringLength(2000, ErrorMessage = "Instructions cannot exceed 2000 characters")]
-        public string Instructions { get; set; }
+        public string? Instructions { get; set; }
 
         // ✅ STEP 20: Activate/Deactivate exams
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         public DateTime? UpdatedDate { get; set; }
 

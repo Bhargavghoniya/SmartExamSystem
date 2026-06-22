@@ -34,7 +34,7 @@ namespace SmartExamSystem.Models
         public string Description { get; set; }
 
         [Required]
-        public DateTime LogTime { get; set; } = DateTime.Now;
+        public DateTime LogTime { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         // Foreign Key
         [ForeignKey("AttemptId")]

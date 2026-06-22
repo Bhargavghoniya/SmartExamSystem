@@ -17,7 +17,7 @@ namespace SmartExamSystem.Models
 
         // ✅ STEP 23: Server-based timer
         [Required]
-        public DateTime StartTime { get; set; } = DateTime.Now;
+        public DateTime StartTime { get; set; } = SmartExamSystem.Helpers.TimeHelper.GetLocalTime();
 
         public DateTime? EndTime { get; set; }
 
@@ -49,7 +49,7 @@ namespace SmartExamSystem.Models
                 }
                 else
                 {
-                    return (int)(DateTime.Now - StartTime).TotalMinutes;
+                    return (int)(SmartExamSystem.Helpers.TimeHelper.GetLocalTime() - StartTime).TotalMinutes;
                 }
             }
         }
